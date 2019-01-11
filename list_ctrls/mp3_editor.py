@@ -2,11 +2,16 @@ import eyed3
 import glob
 import wx
 
+class EditDialog(wx.Dialog):
+    
+    def __init__(self, mp3):
+        title = 'Editing "{title}"'.format(title=mp3.tag.title)
+        super().__init__(parent=None, title=title)
 
 class Mp3Panel(wx.Panel):
     
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        super().__init__(parent)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.row_obj_dict = {}
         
@@ -17,6 +22,7 @@ class Mp3Panel(wx.Panel):
         self.list_ctrl.InsertColumn(0, 'Artist', width=140)
         self.list_ctrl.InsertColumn(1, 'Album', width=140)
         self.list_ctrl.InsertColumn(2, 'Title', width=200)
+        self.list_ctrl.InsertColumn(3, 'Year', width=200)
         main_sizer.Add(self.list_ctrl, 0, wx.ALL|wx.EXPAND, 5)
         
         edit_button = wx.Button(self, label='Edit')
@@ -27,8 +33,11 @@ class Mp3Panel(wx.Panel):
         
     def on_edit(self, event):
         selection = self.list_ctrl.GetFocusedItem()
-        mp3 = self.row_obj_dict[selection]
-        print
+        if selection >= 0:
+            mp3 = self.row_obj_dict[selection]
+            dlg = EditDialog(mp3)
+            dlg.ShowModal()
+            dlg.Destroy()
         
     def update_mp3_listing(self, folder_path):
         self.list_ctrl.ClearAll()
@@ -36,6 +45,7 @@ class Mp3Panel(wx.Panel):
         self.list_ctrl.InsertColumn(0, 'Artist', width=140)
         self.list_ctrl.InsertColumn(1, 'Album', width=140)
         self.list_ctrl.InsertColumn(2, 'Title', width=200)
+        self.list_ctrl.InsertColumn(3, 'Year', width=200)
         
         mp3s = glob.glob(folder_path + '/*.mp3')
         mp3_objects = []
@@ -54,7 +64,7 @@ class Mp3Panel(wx.Panel):
 class Mp3Frame(wx.Frame):
     
     def __init__(self):
-        wx.Frame.__init__(self, parent=None, title='Mp3 Tag Editor')
+        super().__init__(parent=None, title='Mp3 Tag Editor')
         self.panel = Mp3Panel(self)
         self.create_menu()
         self.Show()
